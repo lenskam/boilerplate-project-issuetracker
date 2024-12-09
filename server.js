@@ -2,7 +2,8 @@
 
 const express     = require('express');
 const bodyParser  = require('body-parser');
-const expect      = require('chai').expect;
+const expect      = require('chai');
+const mongoose = require('mongoose');
 const cors        = require('cors');
 require('dotenv').config();
 
@@ -47,19 +48,22 @@ app.use(function(req, res, next) {
 });
 
 //Start our server and tests!
-const listener = app.listen(process.env.PORT || 3000, function () {
-  console.log('Your app is listening on port ' + listener.address().port);
-  if(process.env.NODE_ENV==='test') {
-    console.log('Running Tests...');
-    setTimeout(function () {
-      try {
-        runner.run();
-      } catch(e) {
-        console.log('Tests are not valid:');
-        console.error(e);
-      }
-    }, 3500);
-  }
-});
+const listener = mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => app.listen(process.env.PORT || 3000, function () {
+    console.log('Your app is listening on port ' + process.env.PORT);
+    if(process.env.NODE_ENV==='test') {
+      console.log('Running Tests...');
+      setTimeout(function () {
+        try {
+          runner.run();
+        } catch(e) {
+          console.log('Tests are not valid:');
+          console.error(e);
+        }
+      }, 3500);
+    }
+  }))
+  .catch(err => console.error(err));
+ 
 
 module.exports = app; //for testing
